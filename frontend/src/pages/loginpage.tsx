@@ -11,23 +11,22 @@ function LoginPage() {
 
     const handleLogin = async () => {
         try {
-            const response = await axios.post('http://localhost:8080/api/v1/auth/login', {
-                username,
-                password
-            },
-            {
-                withCredentials: true
-            }
-        );
-
-            console.log("User logged in and cookie set", response);
-
-            navigate('/homepage');
-
+          const response = await axios.post(
+            'http://localhost:8080/api/v1/auth/login',
+            { username, password }
+          );
+      
+          console.log("User logged in:", response.data);
+      
+          const token = response.data.token;
+          localStorage.setItem('token', token);
+      
+          navigate('/homepage');
+      
         } catch (error: any) {
-            console.log(error.response ? error.response : error.data);
+          console.log(error.response ? error.response : error.data);
         }
-    }
+      }; 
 
     return (<>
         <head>

@@ -13,9 +13,12 @@ function ImageTransferPage() {
 
   useEffect(() => {
     // STOMP Client with cookie-based session (no connectHeaders)
+    const token = localStorage.getItem('token');
     const client = new Client({
-      webSocketFactory: () => new SockJS("http://localhost:8080/ws"),
-      connectHeaders: {}, // No JWT header needed; cookie handles it.
+      webSocketFactory: () => new SockJS(`http://localhost:8080/ws?token=${token}`),
+      connectHeaders: {
+        Authorization: `Bearer ${token}`,
+      }
     });
 
     client.onConnect = () => {
@@ -36,7 +39,9 @@ function ImageTransferPage() {
       // Fetch online peers
       axios
         .get("http://localhost:8080/api/v1/images/transfer-peers", {
-          withCredentials: true, // tell browser to send the cookie
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
         .then((res) => {
           console.log("Peers:", res.data);
@@ -47,7 +52,9 @@ function ImageTransferPage() {
       // Fetch own saved images
       axios
         .get("http://localhost:8080/api/v1/images/view", {
-          withCredentials: true,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         })
         .then((res) => {
           console.log("My images:", res.data.Images);
@@ -69,6 +76,7 @@ function ImageTransferPage() {
     }
 
     try {
+      const token = localStorage.getItem('token'); 
       await axios.post(
         "http://localhost:8080/api/v1/images/send-image",
         null,
@@ -77,7 +85,9 @@ function ImageTransferPage() {
             recipient: selectedPeer,
             imageUrl: selectedImage,
           },
-          withCredentials: true, // use cookie
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       alert(`Image sent to ${selectedPeer}!`);

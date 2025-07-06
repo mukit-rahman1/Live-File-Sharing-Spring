@@ -19,10 +19,25 @@ public class JWTHandshakeInterceptor implements HandshakeInterceptor {
         @NonNull WebSocketHandler wsHandler,
         @NonNull Map<String, Object> attributes) {
     
-        // Don't reject handshake.
         System.out.println("Handshake attempt");
+    
+        String query = request.getURI().getQuery();
+        String token = null;
+    
+        if (query != null && query.startsWith("token=")) {
+            token = query.substring(6);
+        }
+    
+        if (token != null && !token.isEmpty()) {
+            attributes.put("token", token);
+            System.out.println("Found WS token: " + token);
+        } else {
+            System.out.println("No WS token found");
+        }
+    
         return true;
     }
+    
     
 
     @Override

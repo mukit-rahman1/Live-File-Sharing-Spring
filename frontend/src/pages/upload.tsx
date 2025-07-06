@@ -10,31 +10,30 @@ function UploadPage () {
     const handleFileChange = (event: any) => {
         setFile(event.target.files[0]);
     }
-
     const handleUpload = async () => {
         if (!file) {
-            setStatus('No file selected');
-            return
+          setStatus('No file selected');
+          return;
         }
+      
         const formData = new FormData();
         formData.append('file', file);
-
+      
         try {
-            const token = localStorage.getItem('token');
-            console.log("token: ", token);
-            await axios.post('http://localhost:8080/api/v1/images/upload', formData, {
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'multipart/form-data'
-                },
-            });
-            setStatus('Uploaded');
+          const token = localStorage.getItem('token');
+          console.log(token);
+          await axios.post('http://localhost:8080/api/v1/images/upload', formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          setStatus('Uploaded');
         } catch (error: any) {
-            setStatus('Upload failed');
-            console.log(error.response ? error.response : error.data);
+          setStatus('Upload failed');
+          console.log(error.response ? error.response : error.data);
         }
-
-    };
+      };
 
 
     return( <>

@@ -36,18 +36,14 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             jwt = authHeader.substring(7);
         }
 
-        //If header not present, fallback to cookie:
-        if (jwt == null && request.getCookies() != null) {
-            jwt = Arrays.stream(request.getCookies())
-                    .filter(c -> c.getName().equals("token"))
-                    .map(Cookie::getValue)
-                    .findFirst()
-                    .orElse(null);
-        }
+
+        System.out.println("JWT Found: " + jwt);
 
         if (jwt != null && jwtService.isTokenValid(jwt)) {
             String username = jwtService.extractUsername(jwt);
+            System.out.println("Username: " + username);
             var userDetails = userDetailsService.loadUserByUsername(username);
+            System.out.println("Loaded user: " + userDetails.getUsername());
 
             if (SecurityContextHolder.getContext().getAuthentication() == null) {
                 var authToken = new UsernamePasswordAuthenticationToken(

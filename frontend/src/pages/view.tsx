@@ -9,8 +9,11 @@ function ViewImages() {
     useEffect(() => {
         const fetchImages = async () => {
             try {
+                const token = localStorage.getItem('token');
                 const response = await axios.get('http://localhost:8080/api/v1/images/view', {
-                    withCredentials: true, // THE KEY for cookies!
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
                 });
                 console.log('api response:', response.data);
                 setImages(response.data.Images);

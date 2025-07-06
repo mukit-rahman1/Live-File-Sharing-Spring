@@ -1,7 +1,7 @@
 package com.wolvie.fileShare.controller;
 
 import com.wolvie.fileShare.service.JWTService;
-
+import org.springframework.http.HttpHeaders;
 import jakarta.servlet.http.HttpServletResponse;
 
 import com.wolvie.fileShare.repo.UserRepository;
@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import java.util.Map;
 
 import com.wolvie.fileShare.model.Users;
 import com.wolvie.fileShare.model.LoginRequest;
@@ -42,7 +43,11 @@ public class AuthController {
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
-        return ResponseEntity.ok("Registered successfully");
+
+        // auto-generate JWT
+        UserDetails userDetails = userRepository.findByUsername(user.getUsername()).get();
+        String jwt = jwtService.generateToken(userDetails);
+        return ResponseEntity.ok().body(Map.of("token", jwt));
     }
 
     @PostMapping("/login")
@@ -54,30 +59,16 @@ public class AuthController {
         UserDetails user = userRepository.findByUsername(request.getUsername()).get();
         String jwt = jwtService.generateToken(user);
 
-        //Set JWT as HTTP-only cookie
-        ResponseCookie cookie = ResponseCookie.from("token", jwt)
-                .httpOnly(true)
-                .secure(false) // true for production HTTPS!
-                .path("/")
-                .sameSite("Strict")
-                .build();
-
-        response.addHeader("Set-Cookie", cookie.toString());
-        return ResponseEntity.ok("Login success!");
+        return ResponseEntity.ok().body(Map.of("token", jwt));
     }
+
+    
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
-        //Clear cookie
-        ResponseCookie cookie = ResponseCookie.from("token", "")
-                .httpOnly(true)
-                .secure(false)
-                .path("/")
-                .maxAge(0)
-                .sameSite("Strict")
-                .build();
+        //clear jwt local
+        response.addHeader("jwt", "");
 
-        response.addHeader("Set-Cookie", cookie.toString());
-        return ResponseEntity.ok("Logged out");
+        return ResponseEntity.ok().body(Map.of("message", "Logged out"));
     }
 }

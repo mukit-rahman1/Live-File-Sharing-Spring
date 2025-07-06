@@ -1,7 +1,6 @@
 import TopBar from "./TopBar";
 import { useState } from "react";
 import axios from "axios";
-import Cookies from "js-cookie"; // import js-cookie
 
 function RegisterPage() {
     const [username, setUsername] = useState('');
@@ -10,29 +9,24 @@ function RegisterPage() {
 
     const handleCreate = async () => {
         try {
-            // 1) Get the CSRF token from the cookie
-            const csrfToken = Cookies.get('XSRF-TOKEN');
-
-            // 2) Make the POST with credentials + CSRF header
-            const response = await axios.post(
-                'http://localhost:8080/api/v1/auth/register',
-                { username, password },
-                {
-                    withCredentials: true, // ensures cookies are sent
-                    headers: {
-                        'X-XSRF-TOKEN': csrfToken, // required
-                    },
-                }
-            );
-
-            console.log("User created:", response.data);
-            window.location.href = '/homepage'; // redirect if successful
+          const response = await axios.post(
+            'http://localhost:8080/api/v1/auth/register',
+            { username, password }
+          );
+      
+          console.log("User created:", response.data);
+      
+          const token = response.data.token;
+          localStorage.setItem('token', token);
+      
+          window.location.href = '/homepage';
+      
         } catch (error: any) {
-            const msg = error?.response?.data?.message || error.message || 'Registration failed';
-            setError(msg);
-            console.log(error);
+          const msg = error?.response?.data?.message || error.message || 'Registration failed';
+          setError(msg);
+          console.log(error);
         }
-    };
+      };
 
     return (
         <>
